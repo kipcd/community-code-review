@@ -110,7 +110,7 @@ After running the container, go to **Docker Desktop → Containers** tab and cli
 
   Volunteer ID:     alice-pc-12345
   Coordinator:      <coordinator-url>
-  Model:            qwen3-30b-a3b-q4_k_m.gguf
+  Model:            Qwen3-30B-A3B-Q4_K_M.gguf
   Context Size:     32768
 
   GPU(s) detected:
@@ -118,7 +118,7 @@ After running the container, go to **Docker Desktop → Containers** tab and cli
   → Auto-selected GPU 0 (default). (Set GPU_DEVICES to override.)
   GPU Layers:       99
 
-  ✓ Model file found: /models/qwen3-30b-a3b-q4_k_m.gguf
+  ✓ Model file found: /models/Qwen3-30B-A3B-Q4_K_M.gguf
   Model size: 6.8Gi
 
   Starting llama-server...
@@ -188,14 +188,14 @@ docker run -d \
   -v /c/Users/YourName/code-review-models:/models \
   -e COORDINATOR_URL="<coordinator-url>" \
   -e MODEL_REPO="Qwen/Qwen3-30B-A3B-GGUF" \
-  -e MODEL_FILE="qwen3-30b-a3b-q4_k_m.gguf" \
+  -e MODEL_FILE="Qwen3-30B-A3B-Q4_K_M.gguf" \
   ghcr.io/<your-org>/volunteer:latest
 ```
 
 Or from a direct download URL:
 
 ```bash
-  -e MODEL_URL="https://huggingface.co/Qwen/Qwen3-30B-A3B-GGUF/resolve/main/qwen3-30b-a3b-q4_k_m.gguf"
+  -e MODEL_URL="https://huggingface.co/Qwen/Qwen3-30B-A3B-GGUF/resolve/main/Qwen3-30B-A3B-Q4_K_M.gguf?download=true"
 ```
 
 ### `GPU_DEVICES` (optional)

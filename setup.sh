@@ -173,7 +173,7 @@ if [ "$SMOKE_TEST" = "y" ] || [ "$SMOKE_TEST" = "Y" ]; then
         -e VOLUNTEER_ID="smoke-test" \
         -e VOLUNTEER_SECRET="${COORDINATOR_SECRET}" \
         -e MODEL_REPO="Qwen/Qwen3-30B-A3B-GGUF" \
-        -e MODEL_FILE="qwen3-30b-a3b-q4_k_m.gguf" \
+        -e MODEL_FILE="Qwen3-30B-A3B-Q4_K_M.gguf" \
         volunteer:latest
 
     echo "⏳ Waiting for model download and registration (this may take a while)..."

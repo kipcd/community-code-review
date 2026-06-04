@@ -4,7 +4,7 @@ set -e
 COORDINATOR_URL="${COORDINATOR_URL:?COORDINATOR_URL is required}"
 VOLUNTEER_ID="${VOLUNTEER_ID:-$(hostname)-$$}"
 MODEL_REPO="${MODEL_REPO:-Qwen/Qwen3-30B-A3B-GGUF}"
-MODEL_FILE="${MODEL_FILE:-qwen3-30b-a3b-q4_k_m.gguf}"
+MODEL_FILE="${MODEL_FILE:-Qwen3-30B-A3B-Q4_K_M.gguf}"
 MODEL_URL="${MODEL_URL:-}"
 LLAMA_PORT="${LLAMA_PORT:-8080}"
 LLAMA_CTX_SIZE="${LLAMA_CTX_SIZE:-32768}"
@@ -43,7 +43,7 @@ download_model() {
 }
 
 if [ ! -f "${MODEL_PATH}" ]; then
-    DOWNLOAD_URL="${MODEL_URL:-https://huggingface.co/${MODEL_REPO}/resolve/main/${MODEL_FILE}}"
+    DOWNLOAD_URL="${MODEL_URL:-https://huggingface.co/${MODEL_REPO}/resolve/main/${MODEL_FILE}?download=true}"
     download_model "${DOWNLOAD_URL}" "${MODEL_PATH}"
 fi
 
