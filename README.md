@@ -1,6 +1,6 @@
-# Community Code Review — Volunteer-Hosted AI PR Reviews
+# Community Code Review
 
-> Free, community-powered AI code reviews for this GitHub organization.
+> Community-powered AI code reviews for this GitHub organization.
 
 ## How It Works
 
