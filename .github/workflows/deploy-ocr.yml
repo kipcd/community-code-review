@@ -16,7 +16,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Replicate OCR workflow to repositories
+      - name: Replicate OCR workflow to other repositories
+        if: ${{ github.event.inputs.repo_name != github.event.repository.name }}
         uses: derberg/manage-files-in-multiple-repositories@v2
         with:
           github_token: ${{ secrets.PAT_WITH_REPO_SCOPE }}
@@ -26,3 +27,23 @@ jobs:
           commit_message: "Add automated code review workflow"
           committer_username: web-flow
           committer_email: noreply@github.com
+
+      - name: Self-deploy OCR workflow to current repository
+        if: ${{ github.event.inputs.repo_name == github.event.repository.name }}
+        env:
+          GH_TOKEN: ${{ secrets.PAT_WITH_REPO_SCOPE }}
+        run: |
+          git config user.name "web-flow"
+          git config user.email "noreply@github.com"
+          BRANCH="bot/add-ocr-workflow-$(date +%s)"
+          git checkout -b "$BRANCH"
+          mkdir -p .github/workflows
+          cp workflows/ocr-review.yml .github/workflows/ocr-review.yml
+          git add .github/workflows/ocr-review.yml
+          git commit -m "Add automated code review workflow"
+          git push origin "$BRANCH"
+          gh pr create \
+            --base "${{ github.event.repository.default_branch }}" \
+            --head "$BRANCH" \
+            --title "Add automated code review workflow" \
+            --body "This PR adds the automated OCR code review workflow to this repository."
