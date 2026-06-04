@@ -26,9 +26,8 @@ echo ""
 
 # ── Remove .env file ─────────────────────────────────────────────────────
 if [ -f .env ]; then
-    echo "🗑️  Removing .env file..."
-    rm .env
-    echo "  ✓ .env removed"
+    echo "� .env file left in place — you can reuse it next time."
+    echo "  To start from scratch, delete it with: rm .env"
 fi
 echo ""
 
