@@ -12,6 +12,7 @@ import asyncio
 import json
 import logging
 import os
+import urllib.parse
 
 import httpx
 
@@ -34,7 +35,7 @@ WS_BASE = COORDINATOR_URL.replace("http://", "ws://").replace("https://", "wss:/
 WS_URL = f"{WS_BASE}/ws/{VOLUNTEER_ID}"
 
 if VOLUNTEER_SECRET:
-    WS_URL += f"?secret={VOLUNTEER_SECRET}"
+    WS_URL += f"?secret={urllib.parse.quote(VOLUNTEER_SECRET, safe='')}"
 
 LLAMA_API_URL = f"http://localhost:{LLAMA_PORT}/v1/chat/completions"
 
