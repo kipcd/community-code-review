@@ -13,8 +13,8 @@ LABEL org.opencontainers.image.licenses="MIT"
 # Copy llama-server from the official image
 COPY --from=llama /app/llama-server /usr/local/bin/llama-server
 
-# Alpine uses apk instead of apt-get
-RUN apk add --no-cache curl
+# Minimal runtime: bash for entrypoint, curl for health checks
+RUN apk add --no-cache bash curl
 
 WORKDIR /app
 
