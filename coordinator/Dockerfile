@@ -1,4 +1,4 @@
-FROM python:3.14-alpine
+FROM python:3.14-slim
 
 ARG ORG_NAME
 LABEL org.opencontainers.image.title="Community Code Review Coordinator"
