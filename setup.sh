@@ -163,7 +163,7 @@ if [ "$SMOKE_TEST" = "y" ] || [ "$SMOKE_TEST" = "Y" ]; then
 
     echo "🧪 Starting test volunteer..."
     # Remove any previous container with this name
-    docker rm smoke-test-volunteer 2>/dev/null || true
+    docker rm -f smoke-test-volunteer 2>/dev/null || true
     MSYS_NO_PATHCONV=1 docker run -d \
         --name smoke-test-volunteer \
         --gpus all \
