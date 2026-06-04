@@ -24,11 +24,16 @@ for s in d.get('siblings',[]):
 print(0)
 " 2>/dev/null) || size=0
     [ "$size" -le 0 ] && return 0
-    local mb=$(( size / 1024 / 1024 ))
-    local total=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader 2>/dev/null | head -1 | grep -oE '[0-9]+') || total=0
-    local free=$(nvidia-smi --query-gpu=memory.free --format=csv,noheader 2>/dev/null | head -1 | grep -oE '[0-9]+') || free=0
-    echo "  VRAM: ${total}MiB total, ${free}MiB free, model: ~${mb}MiB"
-    [ "$total" -gt 0 ] && [ "$mb" -gt "$total" ] && LLAMA_N_GPU_LAYERS=0 && echo "  Warning: model may not fit VRAM, falling back to CPU"
+    local model_mb=$(( size / 1024 / 1024 ))
+    local vram_total=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader 2>/dev/null | head -1 | grep -oE '[0-9]+') || vram_total=0
+    echo "  Model: ~${model_mb}MiB, VRAM: ${vram_total}MiB total"
+    if [ "$vram_total" -gt 0 ] && [ "$model_mb" -gt "$vram_total" ]; then
+        # Scale layers proportionally — model layers / VRAM ratio
+        local scaled=$(( LLAMA_N_GPU_LAYERS * vram_total / model_mb ))
+        [ "$scaled" -lt 1 ] && scaled=1   # always use GPU for at least 1 layer
+        LLAMA_N_GPU_LAYERS=$scaled
+        echo "  Partial offload: ${LLAMA_N_GPU_LAYERS} GPU layers (auto-scaled)"
+    fi
 }
 
 while true; do

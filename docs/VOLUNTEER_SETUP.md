@@ -64,7 +64,7 @@ Wait for the download to finish — you'll see progress in the terminal.
 
 The container will start and appear in the **Containers** tab with a green "Running" indicator.
 
-> **No GPU?** Leave the GPU settings as-is. The container detects your GPU automatically. If you don't have one, add `GPU_DEVICES` with value `none` in the environment variables section.
+> **No GPU?** Leave the GPU settings as-is. The container detects your GPU automatically and offloads as much as it can.
 
 ## What You'll See
 
