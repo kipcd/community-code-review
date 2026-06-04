@@ -32,9 +32,13 @@ jobs:
         if: ${{ github.event.inputs.repo_name == github.event.repository.name }}
         env:
           GH_TOKEN: ${{ secrets.PAT_WITH_REPO_SCOPE }}
+          PAT: ${{ secrets.PAT_WITH_REPO_SCOPE }}
+          REPO: ${{ github.repository }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           git config user.name "web-flow"
           git config user.email "noreply@github.com"
+          git remote set-url origin "https://x-access-token:${PAT}@github.com/${REPO}.git"
           BRANCH="bot/add-ocr-workflow-$(date +%s)"
           git checkout -b "$BRANCH"
           mkdir -p .github/workflows
@@ -43,7 +47,7 @@ jobs:
           git commit -m "Add automated code review workflow"
           git push origin "$BRANCH"
           gh pr create \
-            --base "${{ github.event.repository.default_branch }}" \
+            --base "$DEFAULT_BRANCH" \
             --head "$BRANCH" \
             --title "Add automated code review workflow" \
             --body "This PR adds the automated OCR code review workflow to this repository."
