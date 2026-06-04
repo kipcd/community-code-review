@@ -177,7 +177,7 @@ Most volunteers won't need to set this.
 
 | Symptom | Likely Cause | Fix |
 |---------|-------------|-----|
-| "no NVIDIA GPU detected" | Docker Desktop not using WSL 2, or no NVIDIA driver | Check Docker Desktop → Settings → Resources → WSL Integration is enabled; update GPU drivers from nvidia.com |
+| "no GPU detected" | Docker Desktop not using WSL 2, missing GPU drivers, or wrong image tag | Check Docker Desktop → Settings → Resources → WSL Integration is enabled; ensure GPU drivers are up to date; verify you're using the correct image tag for your GPU (`cuda`, `rocm`, `vulkan`, or `intel`) |
 | "Coordinator not reachable" | Wrong URL or coordinator is down | Check the coordinator URL is correct and the server is running |
 | "Registration rejected" | Wrong VOLUNTEER_SECRET | Ask the coordinator for the correct secret |
 | "Model download failed" | Network issue or wrong URL | Check MODEL_URL is correct |
@@ -220,13 +220,13 @@ A: No. The coordinator only knows about your `VOLUNTEER_ID` and GPU info. All co
 A: The initial model download is ~19GB. After that, only small JSON payloads for reviews — typically a few KB per review.
 
 **Q: How do I check if my GPU is working with Docker?**
-A. In Docker Desktop's terminal (or any terminal), run:
+A. The command depends on your GPU:
 
-```bash
-docker run --rm --gpus all nvidia/cuda:12.0-base nvidia-smi
-```
+- **NVIDIA:** Run `docker run --rm --gpus all nvidia/cuda:12.0-base nvidia-smi`
+- **AMD/ROCm:** Run `docker run --rm --device /dev/kfd --device /dev/dri rocm/pytorch rocm-smi`
+- **Vulkan/Intel:** Start the volunteer container and check the startup logs for GPU detection
 
-If you see GPU info, it's working. If you get an error, make sure Docker Desktop is using the WSL 2 backend and your NVIDIA drivers are up to date.
+If you see GPU info, it's working. If you get an error, make sure Docker Desktop is using the WSL 2 backend and your GPU drivers are up to date.
 
 **Q: Can I run a smaller/bigger model to better suit my hardware?**
 A. Not yet, let's get this working on the target RTX 3060 spec before we make it adjustable.
