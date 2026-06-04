@@ -1,5 +1,13 @@
-# ── Stage 1: llama-server binary ──────────────────────────────────────────
-FROM ghcr.io/ggml-org/llama.cpp:server-cuda
+# ── Select GPU backend at build time ────────────────────────────────────
+# Usage: docker build --build-arg BACKEND=cuda -t volunteer:latest .
+# Supported backends:
+#   cuda    → NVIDIA GPUs (default)
+#   rocm    → AMD GPUs
+#   vulkan  → Any GPU with Vulkan drivers (NVIDIA, AMD, Intel, Apple)
+#   intel   → Intel GPUs (SYCL)
+#   cpu     → CPU only (no GPU acceleration)
+ARG BACKEND=cuda
+FROM ghcr.io/ggml-org/llama.cpp:server-${BACKEND}
 
 ARG ORG_NAME
 LABEL org.opencontainers.image.title="Community Code Review Volunteer"
@@ -26,8 +34,6 @@ RUN chmod +x /entrypoint.sh
 
 VOLUME ["/models"]
 EXPOSE 8080
-
-ENTRYPOINT ["/entrypoint.sh"]
 
 # The only host path volunteers must share — model storage
 VOLUME ["/models"]

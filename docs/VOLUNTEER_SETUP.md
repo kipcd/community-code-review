@@ -15,18 +15,31 @@ You'll run a **Docker container** on your machine that uses your GPU to help rev
 
 | Requirement | How to Check | Details |
 |-------------|--------------|---------|
-| Windows OS (default) | You know what OS you're running, right? | (Mac/Linux users: Follow the instructions for Terminal below) |
 | Docker Desktop | Look for the Docker whale icon in your system tray (taskbar) | Install from [docker.com](https://docs.docker.com/get-docker/) — enable **WSL 2 backend** during setup on Windows |
-| NVIDIA GPU | Open **Task Manager → Performance** tab — look for "GPU" | Install latest NVIDIA drivers from [nvidia.com/drivers](https://www.nvidia.com/drivers) |
-| 13GB+ free disk | Check **This PC** in File Explorer | For the model file (~7GB) + Docker image |
-| GPU VRAM: 8GB+ dedicated or 16GB+ shared | Task Manager → Performance → GPU "Dedicated/Shared GPU memory" | Required for smooth performance |
+| Compatible GPU | Open **Task Manager → Performance** tab — look for "GPU" | NVIDIA, AMD, Intel Arc, or any GPU with Vulkan drivers |
+| 19GB+ free disk | Check **This PC** in File Explorer | For the model file (~19GB) |
+| 6GB+ free disk | Check **This PC** in File Explorer | For Docker Desktop image storage (~6GB) |
+| 8GB+ VRAM (dedicated or shared) | Task Manager → Performance → GPU memory | Required for smooth performance; less VRAM just means slower inference |
+
+### Which GPU backend should I use?
+
+The right image tag depends on your hardware. Check which backend matches your setup:
+
+| Backend | Tag | When to use |
+|---------|-----|-------------|
+| **NVIDIA CUDA** | `ghcr.io/slopsmith/volunteer:cuda` (also `:latest`) | NVIDIA GeForce RTX, GTX, Quadro, Tesla (most common) |
+| **AMD ROCm** | `ghcr.io/slopsmith/volunteer:rocm` | AMD Radeon RX 7000+, Instinct |
+| **Vulkan** | `ghcr.io/slopsmith/volunteer:vulkan` | Any GPU: NVIDIA, AMD (older cards), Intel Arc, Apple via MoltenVK |
+| **Intel SYCL** | `ghcr.io/slopsmith/volunteer:intel` | Intel Arc, Iris Xe, built-in GPUs |
+
+If you're not sure, start with `cuda` for NVIDIA or `vulkan` for everything else. Both can be run side by side, so you can switch if one performs better.
 
 
 ## Quick Start
 
 ### Step 1: Create a folder for the model
 
-In File Explorer, create a folder called `code-review-models` — for example at `C:\code-review-models`. The drive needs about 12GB of free space for the model.
+In File Explorer, create a folder called `code-review-models` — for example at `C:\code-review-models`. The drive needs about 19GB of free space for the model file.
 
 ### Step 2: Open Docker Desktop's terminal and pull the image
 
@@ -37,6 +50,8 @@ In File Explorer, create a folder called `code-review-models` — for example at
 ```
 docker pull ghcr.io/slopsmith/volunteer:latest
 ```
+
+If you have an AMD or Intel GPU, replace `latest` with the matching tag from the table above (e.g. `rocm`, `vulkan`, or `intel`).
 
 Wait for the download to finish — you'll see progress in the terminal.
 
@@ -202,7 +217,7 @@ A: The container uses your GPU, but only when a PR review is happening. Between 
 A: No. The coordinator only knows about your `VOLUNTEER_ID` and GPU info. All communication is your container reaching out to check in.
 
 **Q: How much bandwidth does this use?**
-A: The initial model download is ~7GB. After that, only small JSON payloads for reviews — typically a few KB per review.
+A: The initial model download is ~19GB. After that, only small JSON payloads for reviews — typically a few KB per review.
 
 **Q: How do I check if my GPU is working with Docker?**
 A. In Docker Desktop's terminal (or any terminal), run:

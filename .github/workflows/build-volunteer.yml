@@ -14,6 +14,9 @@ permissions:
 
 jobs:
   build-and-push:
+    strategy:
+      matrix:
+        backend: [cuda, rocm, vulkan, intel]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -26,10 +29,20 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push volunteer image
+      - name: Build and push volunteer image (${{ matrix.backend }})
         uses: docker/build-push-action@v6
         with:
           context: volunteer
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/volunteer:latest
-          build-args: ORG_NAME=${{ github.repository_owner }}
+          tags: ghcr.io/${{ github.repository_owner }}/volunteer:${{ matrix.backend }}
+          build-args: |
+            ORG_NAME=${{ github.repository_owner }}
+            BACKEND=${{ matrix.backend }}
+
+      # Tag the CUDA build as "latest" too (most common backend)
+      - name: Tag cuda as latest
+        if: matrix.backend == 'cuda'
+        run: |
+          docker tag ghcr.io/${{ github.repository_owner }}/volunteer:cuda \
+                 ghcr.io/${{ github.repository_owner }}/volunteer:latest
+          docker push ghcr.io/${{ github.repository_owner }}/volunteer:latest
