@@ -54,7 +54,7 @@ through the already-established WebSocket tunnel.
 
 ## Volunteer Lifecycle & GPU Awareness
 
-Volunteers move through four states, tracked by the coordinator:
+Volunteers move through five states, tracked by the coordinator:
 
 | State | Description | Accepts work? |
 |-------|-------------|---------------|
@@ -143,7 +143,6 @@ The coordinator assigns work in this order:
 ### Capacity Check
 
 Before assigning work, the coordinator also checks that `active_requests < max_parallel` for the volunteer. A `ready` volunteer with `active_requests == max_parallel` is treated as full — the coordinator moves on to the next candidate. `busy` volunteers with remaining slots are preferred over `unloaded` ones to avoid model-load latency.
-4. **Never pick `loading`** — they'd just queue behind their own load
 
 This minimizes time-to-review while respecting volunteer GPU availability.
 

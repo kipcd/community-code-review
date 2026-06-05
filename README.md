@@ -90,7 +90,7 @@ community-code-review/
 - [Architecture Overview](ARCHITECTURE.md)
 - [Leader Setup Guide](docs/LEADER_SETUP.md)
 - [Volunteer Setup Guide](docs/VOLUNTEER_SETUP.md)
-- [GitHub Actions Configuration](docs/GITHUB_ACTIONS_SETUP.md)
+- [GitHub Actions Configuration](docs/GITHUB_ACTION.md)
 
 ## Testing
 
