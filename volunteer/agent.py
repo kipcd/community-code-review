@@ -190,7 +190,9 @@ async def _update_model_state(ws):
 
     if _active_requests > 0:
         new_state = "busy"
-    elif _gpu_stats["utilization"] > GPU_UTIL_THRESHOLD or _gpu_stats["memory"] > GPU_MEM_THRESHOLD:
+    elif _gpu_stats["utilization"] > GPU_UTIL_THRESHOLD:
+        # High GPU compute utilization means another workload (e.g. gaming)
+        # is using the GPU. High memory alone just means the model is loaded.
         new_state = "busy"
     else:
         # Transition from unloaded -> loading -> ready
