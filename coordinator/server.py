@@ -224,7 +224,8 @@ async def websocket_endpoint(ws: WebSocket, volunteer_id: str):
                 "message": (
                     "Your volunteer image is outdated (protocol v1). "
                     "Please update for GPU-aware scheduling and better performance. "
-                    "Run: docker pull ghcr.io/slopsmith/volunteer:latest"
+                    "Run: docker pull ghcr.io/slopsmith/volunteer:latest "
+                    "then stop, remove, and re-run your container to use the new image."
                 ),
             })
         except Exception:

@@ -237,6 +237,25 @@ docker rm code-review-volunteer
 
 You can stop anytime. The coordinator will detect your absence and route reviews to other volunteers. No hard feelings! 🎉
 
+## Staying Up to Date
+
+New volunteer images are released periodically with bug fixes, performance improvements, and new features (like GPU-aware scheduling). To update:
+
+1. **Pull the latest image:**
+   ```bash
+   docker pull ghcr.io/slopsmith/volunteer:latest
+   ```
+
+2. **Stop and remove your current container:**
+   ```bash
+   docker stop code-review-volunteer
+   docker rm code-review-volunteer
+   ```
+
+3. **Re-run with the new image** using the same settings from [Step 3](#step-3-create-and-run-the-container-docker-desktop-gui) above.
+
+> **Tip:** If you see a warning in your logs like "Your volunteer image is outdated," that's your cue to update. The coordinator will still accept work from older versions, but you won't get new features like automatic GPU load detection.
+
 ## Checking Logs
 
 In **Docker Desktop**, go to the **Containers** tab, click on `code-review-volunteer`, then click the **Logs** tab.
