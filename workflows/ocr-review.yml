@@ -39,6 +39,7 @@ jobs:
           ocr config set llm.model "${{ secrets.OCR_LLM_MODEL || 'qwen3-30b-a3b' }}"
           ocr config set llm.use_anthropic false
           ocr config set llm.extra_body '{"thinking": {"type": "disabled"}}'
+          ocr config set language English
 
       - name: Run OpenCodeReview
         id: review

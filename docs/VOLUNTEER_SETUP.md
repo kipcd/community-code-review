@@ -116,10 +116,51 @@ After running the container, go to **Docker Desktop → Containers** tab and cli
 
 When a review comes in, you'll see a log message like:
 
-```
+```text
 📥 Received a code review request — running inference...
 ✅ Review complete — result sent back to coordinator
 ```
+
+## GPU Awareness — Gaming & Other GPU Work
+
+The volunteer **automatically detects** when your GPU is busy with other work and steps aside. You don't need to do anything.
+
+### What you'll see in the logs
+
+**When you start a game or other GPU-heavy app:**
+```text
+🎮 Looks like something else is using the GPU... I'll stop accepting work until things quiet down.
+```
+
+**When a review is already in progress when your GPU gets busy:**
+```text
+🎮 Looks like the GPU just got busy, but I'm in the middle of handling something. I'll finish that up, then stop accepting work until things quiet down. Should be ~60s. You might see the GPU stutter until then.
+```
+
+**When your GPU is free again:**
+```text
+✅ GPU is quiet again — ready to accept review requests!
+```
+
+### How it works
+
+The container monitors your GPU utilization every 5 seconds. If your GPU is busy (above ~70% utilization or ~85% memory usage), the volunteer **unloads the model from VRAM** to free up space for your game or other work. The coordinator stops sending new review requests to you.
+
+When your GPU quiets down again, the volunteer returns to the `unloaded` state — connected and ready, but with no model in memory. The next review request that comes in will trigger a reload (30–60 seconds). This way your GPU is completely free when you're using it, and only occupied when there's actual review work to do.
+
+**You don't need to stop the container before gaming.** Just launch your game — the volunteer will detect it, unload the model, and free your VRAM automatically.
+
+## The Model File
+
+The first time you run the container, it downloads a ~19GB model file to your shared folder (e.g., `C:\code-review-models`). The container also creates a `README.md` in that folder explaining what the file is.
+
+### If you need disk space temporarily
+
+You can safely delete the model file when the container is stopped. It will be re-downloaded automatically the next time the container starts. Just remember that re-downloading takes time and bandwidth.
+
+### If you delete the container or Docker
+
+The model file stays in your shared folder (`C:\code-review-models` or wherever you created it). If you're cleaning up disk space and wondering what that large file is, the `README.md` in the same folder should help jog your memory.
 
 ## Understanding the Options
 
@@ -196,6 +237,25 @@ docker rm code-review-volunteer
 
 You can stop anytime. The coordinator will detect your absence and route reviews to other volunteers. No hard feelings! 🎉
 
+## Staying Up to Date
+
+New volunteer images are released periodically with bug fixes, performance improvements, and new features (like GPU-aware scheduling). To update:
+
+1. **Pull the latest image:**
+   ```bash
+   docker pull ghcr.io/slopsmith/volunteer:latest
+   ```
+
+2. **Stop and remove your current container:**
+   ```bash
+   docker stop code-review-volunteer
+   docker rm code-review-volunteer
+   ```
+
+3. **Re-run with the new image** using the same settings from [Step 3](#step-3-create-and-run-the-container-docker-desktop-gui) above.
+
+> **Tip:** If you see a warning in your logs like "Your volunteer image is outdated," that's your cue to update. The coordinator will still accept work from older versions, but you won't get new features like automatic GPU load detection.
+
 ## Checking Logs
 
 In **Docker Desktop**, go to the **Containers** tab, click on `code-review-volunteer`, then click the **Logs** tab.
@@ -210,8 +270,11 @@ Press `Ctrl+C` to stop following logs (container keeps running).
 
 ## FAQ
 
-**Q: Will this slow down my computer?**
-A: The container uses your GPU, but only when a PR review is happening. Between reviews, it idles. You can set `LLAMA_N_PARALLEL=1` to limit GPU usage.
+**Q: Will this slow down my computer or interfere with gaming?**
+A: The container automatically detects when your GPU is busy with other work (gaming, rendering, etc.) and **unloads the model from VRAM** to free up space. It will finish any review already in progress, then unload and step aside until your GPU is free again. You don't need to manually pause or stop anything — just launch your game and the volunteer will handle the rest.
+
+**Q: What happens if I start a game while a review is running?**
+A: The volunteer will finish the current review, then **unload the model from VRAM** and stop accepting new work until your GPU quiets down. You might see a brief GPU stutter while the review wraps up (usually 30–60 seconds). After that, your GPU and VRAM are completely free. When gaming ends, the volunteer will be ready to reload the model on the next review request.
 
 **Q: Does the coordinator have any access to my machine?**
 A: No. The coordinator only knows about your `VOLUNTEER_ID` and GPU info. All communication is your container reaching out to check in.
