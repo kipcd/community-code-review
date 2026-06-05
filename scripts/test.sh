@@ -49,7 +49,27 @@ cleanup
 
 trap cleanup EXIT
 
-# ── Step 1: Run unit tests for agent state machine ────────────────────────
+# ── Step 1: Build images first ───────────────────────────────────────────
+echo ""
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║  Community Code Review — Integration Test                    ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+echo ""
+info "MOCK_MODE=${MOCK_MODE}  (1=stub llama-server, 0=real model)"
+echo ""
+
+info "Building coordinator image..."
+docker build -t coordinator:test "${PROJECT_ROOT}/coordinator" >/dev/null
+ok "Coordinator image built"
+
+info "Building volunteer image..."
+docker build \
+    --build-arg ORG_NAME=slopsmith \
+    -t "${VOLUNTEER_IMAGE}" \
+    "${PROJECT_ROOT}/volunteer" >/dev/null
+ok "Volunteer image built"
+
+# ── Step 2: Run unit tests for agent state machine ────────────────────────
 echo ""
 info "Running unit tests for agent state machine..."
 UNIT_TEST_RESULT=$(docker run --rm \
@@ -69,30 +89,9 @@ elif echo "${UNIT_TEST_RESULT}" | grep -q "FAILED"; then
     echo "${UNIT_TEST_RESULT}"
     fail "Unit tests FAILED"
 else
-    warn "Unit test output ambiguous — check above"
+    fail "Unit test output ambiguous — pytest may have crashed"
     echo "${UNIT_TEST_RESULT}" | tail -30
 fi
-
-# ── Step 2: Build coordinator image ───────────────────────────────────────
-echo ""
-echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║  Community Code Review — Integration Test                    ║"
-echo "╚══════════════════════════════════════════════════════════════╝"
-echo ""
-info "MOCK_MODE=${MOCK_MODE}  (1=stub llama-server, 0=real model)"
-echo ""
-
-info "Building coordinator image..."
-docker build -t coordinator:test "${PROJECT_ROOT}/coordinator" >/dev/null
-ok "Coordinator image built"
-
-# ── Step 2: Build volunteer image ─────────────────────────────────────────
-info "Building volunteer image..."
-docker build \
-    --build-arg ORG_NAME=slopsmith \
-    -t "${VOLUNTEER_IMAGE}" \
-    "${PROJECT_ROOT}/volunteer" >/dev/null
-ok "Volunteer image built"
 
 # ── Step 3: Create isolated Docker network ────────────────────────────────
 info "Creating test network..."
@@ -239,11 +238,13 @@ fi
 if [ "${STRICT_MODE}" = "1" ]; then
     info "Checking model state transitions after inference..."
 
-    # Wait briefly for the agent to process and update state
-    sleep 2
-
-    VOLUNTEERS=$(curl -sf "http://localhost:${COORDINATOR_PORT}/volunteers" 2>/dev/null || echo "[]")
-    AFTER_STATE=$(echo "${VOLUNTEERS}" | python3 -c "
+    # Poll for stable state (ready or unloaded) with timeout
+    info "Waiting for model state to stabilize..."
+    STATE_STABLE=false
+    for i in $(seq 1 15); do
+        sleep 1
+        VOLUNTEERS=$(curl -sf "http://localhost:${COORDINATOR_PORT}/volunteers" 2>/dev/null || echo "[]")
+        CURRENT_STATE=$(echo "${VOLUNTEERS}" | python3 -c "
 import json, sys
 data = json.load(sys.stdin)
 for v in data:
@@ -252,7 +253,17 @@ for v in data:
         sys.exit(0)
 print('MISSING')
 " 2>/dev/null || echo "MISSING")
+        if [ "${CURRENT_STATE}" = "ready" ] || [ "${CURRENT_STATE}" = "unloaded" ]; then
+            STATE_STABLE=true
+            break
+        fi
+    done
 
+    if [ "${STATE_STABLE}" != true ]; then
+        warn "Model state did not stabilize within 15s (last seen: ${CURRENT_STATE})"
+    fi
+
+    AFTER_STATE="${CURRENT_STATE}"
     if [ "${AFTER_STATE}" = "ready" ]; then
         ok "Model state is 'ready' after inference (loaded, idle)"
     elif [ "${AFTER_STATE}" = "unloaded" ]; then
