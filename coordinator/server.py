@@ -105,8 +105,8 @@ async def _pick_volunteer() -> Optional[tuple[str, dict]]:
             max_p = v.get("max_parallel", 1)
             active = v.get("active_requests", 0)
 
-            # Skip loading volunteers
-            if state == "loading":
+            # Skip loading and unloaded volunteers
+            if state in ("loading", "unloaded"):
                 continue
 
             # Skip GPU-busy volunteers (v2+ only; v1 clients bypass this)
@@ -190,6 +190,7 @@ async def websocket_endpoint(ws: WebSocket, volunteer_id: str):
     model = init_msg.get("model", "unknown")
     peer_addr = ws.client.host if ws.client else "unknown"
     protocol_version = init_msg.get("protocol_version", 1)
+    init_model_state = init_msg.get("model_state", "ready" if protocol_version == 1 else "unloaded")
 
     async with _vol_lock:
         volunteers[volunteer_id] = {
@@ -197,7 +198,7 @@ async def websocket_endpoint(ws: WebSocket, volunteer_id: str):
             "gpu_info": gpu_info,
             "model": model,
             "protocol_version": protocol_version,
-            "model_state": "ready" if protocol_version == 1 else "unloaded",
+            "model_state": init_model_state,
             "gpu_utilization_percent": 0,
             "gpu_memory_used_percent": 0,
             "max_parallel": 1,

@@ -1,0 +1,36 @@
+name: Integration Test
+
+on:
+  push:
+    branches: [main, 'feat/**']
+    paths:
+      - 'coordinator/**'
+      - 'volunteer/**'
+      - 'scripts/test.sh'
+      - '.github/workflows/integration-test.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'coordinator/**'
+      - 'volunteer/**'
+      - 'scripts/test.sh'
+      - '.github/workflows/integration-test.yml'
+  workflow_dispatch:
+
+jobs:
+  integration-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Run integration test
+        run: |
+          chmod +x scripts/test.sh
+          ./scripts/test.sh
+        env:
+          MOCK_MODE: "1"
+          COORDINATOR_PORT: "18080"

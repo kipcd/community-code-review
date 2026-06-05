@@ -148,7 +148,7 @@ async def gpu_monitor_task(ws):
                 logger.debug("GPU quiet — utilization at %d%%", stats["utilization"])
 
             # Update model state based on GPU + active requests
-            await _update_model_state(ws)
+            await _update_model_state_safe(ws)
 
         except Exception as e:
             logger.warning("GPU monitor error: %s", e)
@@ -156,25 +156,31 @@ async def gpu_monitor_task(ws):
 
 
 async def _update_model_state(ws):
-    """Update and broadcast model state based on GPU and request load."""
+    """Update and broadcast model state based on GPU and request load.
+    Must be called while holding _state_lock."""
     global _current_state
+    old_state = _current_state
+
+    if _active_requests > 0:
+        new_state = "busy"
+    elif _gpu_stats["utilization"] > GPU_UTIL_THRESHOLD or _gpu_stats["memory"] > GPU_MEM_THRESHOLD:
+        new_state = "busy"
+    else:
+        new_state = "ready"
+
+    if new_state != old_state:
+        _current_state = new_state
+        await ws.send(json.dumps({
+            "type": "model_state",
+            "state": new_state,
+        }))
+        logger.info("📊 Model state: %s → %s", old_state, new_state)
+
+
+async def _update_model_state_safe(ws):
+    """Acquire lock and update model state."""
     async with _state_lock:
-        old_state = _current_state
-
-        if _active_requests > 0:
-            new_state = "busy"
-        elif _gpu_stats["utilization"] > GPU_UTIL_THRESHOLD or _gpu_stats["memory"] > GPU_MEM_THRESHOLD:
-            new_state = "busy"
-        else:
-            new_state = "ready"
-
-        if new_state != old_state:
-            _current_state = new_state
-            await ws.send(json.dumps({
-                "type": "model_state",
-                "state": new_state,
-            }))
-            logger.info("📊 Model state: %s → %s", old_state, new_state)
+        await _update_model_state(ws)
 
 
 async def run_agent():
@@ -200,9 +206,10 @@ async def connect_and_serve():
             "protocol_version": PROTOCOL_VERSION,
             "gpu_info": GPU_INFO,
             "model": MODEL_FILE,
+            "model_state": _current_state,
         }
         await ws.send(json.dumps(init_msg))
-        logger.info("Sent init message to coordinator (protocol v%d)", PROTOCOL_VERSION)
+        logger.info("Sent init message to coordinator (protocol v%d, state=%s)", PROTOCOL_VERSION, _current_state)
 
         # ── Step 2: Start background tasks ───────────────────────────────
         heartbeat_task = asyncio.create_task(send_heartbeats(ws))
