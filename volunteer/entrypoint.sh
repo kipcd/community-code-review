@@ -42,6 +42,25 @@ print(0)
         LLAMA_N_GPU_LAYERS=$scaled
         echo "  Partial offload: ${LLAMA_N_GPU_LAYERS} GPU layers (auto-scaled)"
     fi
+
+    # Auto-tune parallel slots based on free VRAM (only if user didn't set explicitly)
+    # Each parallel 32K slot needs ~2.5GB for KV cache overhead.
+    local kv_slot_mib=2560
+    local safety_mib=1024
+    if [ "$vram_total" -gt 0 ] && [ "$model_mb" -gt 0 ] && [ "$_LLAMA_N_PARALLEL_WAS_SET" -eq 0 ]; then
+        local available=$(( vram_total - model_mb - safety_mib ))
+        if [ "$available" -ge "$(( kv_slot_mib * 2 ))" ]; then
+            local tuned=$(( available / kv_slot_mib ))
+            # Clamp: at least 1, at most 8 (llama.cpp performance cliff)
+            [ "$tuned" -lt 1 ] && tuned=1
+            [ "$tuned" -gt 8 ] && tuned=8
+            if [ "$tuned" -gt "${LLAMA_N_PARALLEL:-1}" ]; then
+                echo "  Parallel slots: $LLAMA_N_PARALLEL → $tuned (auto-tuned)"
+                LLAMA_N_PARALLEL=$tuned
+                export LLAMA_N_PARALLEL
+            fi
+        fi
+    fi
 }
 
 while true; do
