@@ -36,9 +36,10 @@ jobs:
               echo "latest_tag=${REPO}:latest,${REPO}:${TAG}" >> "$GITHUB_OUTPUT"
             fi
           else
-            echo "tags=${REPO}:${BACKEND}" >> "$GITHUB_OUTPUT"
+            BRANCH="${{ github.ref_name }}"
+            echo "tags=${REPO}:${BACKEND}-${BRANCH}" >> "$GITHUB_OUTPUT"
             if [ "$BACKEND" = "cuda" ]; then
-              echo "latest_tag=${REPO}:latest" >> "$GITHUB_OUTPUT"
+              echo "latest_tag=${REPO}:${BRANCH}" >> "$GITHUB_OUTPUT"
             fi
           fi
 
