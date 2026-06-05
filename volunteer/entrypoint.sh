@@ -145,7 +145,15 @@ time.sleep(999999)
     echo "  Starting agent..."
     cd /app && python3 agent.py &
     AGENT_PID=$!
-    trap "kill \$AGENT_PID 2>/dev/null; exit 0" SIGTERM SIGINT
+    # Cleanup function kills agent and any orphaned llama-server processes
+    _cleanup() {
+        kill "$AGENT_PID" 2>/dev/null || true
+        # Kill any orphaned llama-server that the agent may have started
+        pkill -f "llama-server" 2>/dev/null || true
+        wait "$AGENT_PID" 2>/dev/null || true
+        exit 0
+    }
+    trap _cleanup SIGTERM SIGINT
     echo "  Volunteer running"
     wait -n 2>/dev/null || wait
     echo "=== Process ended, restarting in 5s ==="

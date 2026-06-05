@@ -286,7 +286,16 @@ async def _start_llama_server() -> bool:
             await asyncio.sleep(1)
 
         logger.error("llama-server did not become healthy within 300s — aborting")
-        await _stop_llama_server()
+        # Kill directly without going through _stop_llama_server to avoid
+        # re-acquiring _llama_start_lock (which we already hold).
+        proc = _llama_process
+        _llama_process = None
+        if proc is not None and proc.returncode is None:
+            try:
+                proc.kill()
+                await asyncio.wait_for(proc.wait(), timeout=5.0)
+            except (ProcessLookupError, asyncio.TimeoutError):
+                pass
         return False
 
 
@@ -347,7 +356,7 @@ async def _load_model(ws) -> bool:
     if success:
         elapsed = int(time.time() - _last_request_time)
         _current_state = "ready"
-        await _broadcast_model_state(ws, "ready", load_duration_seconds=elapsed)
+        await _broadcast_model_state(ws, "ready", load_duration_seconds=elapsed, max_parallel=LLAMA_N_PARALLEL)
         logger.info("📊 Model state: loading → ready")
         return True
     else:
@@ -418,7 +427,7 @@ async def _update_model_state(ws):
         # Model is loaded, no requests, GPU is free — stay ready
         if old_state != "ready":
             _current_state = "ready"
-            await _broadcast_model_state(ws, "ready")
+            await _broadcast_model_state(ws, "ready", max_parallel=LLAMA_N_PARALLEL)
             logger.info("📊 Model state: %s → ready", old_state)
     else:
         # Model not running, no requests — stay unloaded
