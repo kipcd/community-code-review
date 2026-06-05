@@ -240,6 +240,16 @@ async def connect_and_serve():
                 elif msg_type == "ping":
                     await ws.send(json.dumps({"type": "pong"}))
 
+                elif msg_type == "server_notice":
+                    level = data.get("level", "info")
+                    message = data.get("message", "")
+                    if level == "warning":
+                        logger.warning("📢 Coordinator says: %s", message)
+                    elif level == "error":
+                        logger.error("📢 Coordinator says: %s", message)
+                    else:
+                        logger.info("📢 Coordinator says: %s", message)
+
                 else:
                     logger.debug("Ignoring message type: %s", msg_type)
 

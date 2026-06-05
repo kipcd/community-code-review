@@ -216,6 +216,19 @@ async def websocket_endpoint(ws: WebSocket, volunteer_id: str):
             "Run: docker pull ghcr.io/slopsmith/volunteer:latest",
             volunteer_id, protocol_version
         )
+        # Send a notice back to the volunteer so it appears in their logs too
+        try:
+            await ws.send_json({
+                "type": "server_notice",
+                "level": "warning",
+                "message": (
+                    "Your volunteer image is outdated (protocol v1). "
+                    "Please update for GPU-aware scheduling and better performance. "
+                    "Run: docker pull ghcr.io/slopsmith/volunteer:latest"
+                ),
+            })
+        except Exception:
+            pass
     else:
         logger.info(
             "Volunteer connected via WebSocket: %s [%s] model=%s from %s pool=%d (protocol v%d)",
