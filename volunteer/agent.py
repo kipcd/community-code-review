@@ -498,7 +498,8 @@ async def run_agent():
             await connect_and_serve()
         except Exception as e:
             logger.error("Connection error: %s — reconnecting in 10s...", e)
-            await asyncio.sleep(10)
+        logger.info("🔁 Reconnecting in 10 seconds...")
+        await asyncio.sleep(10)
 
 
 async def connect_and_serve():
