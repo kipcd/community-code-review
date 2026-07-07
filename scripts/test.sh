@@ -64,7 +64,7 @@ ok "Coordinator image built"
 
 info "Building volunteer image..."
 docker build \
-    --build-arg ORG_NAME=slopsmith \
+    --build-arg ORG_NAME=got-feedback \
     -t "${VOLUNTEER_IMAGE}" \
     "${PROJECT_ROOT}/volunteer" >/dev/null
 ok "Volunteer image built"

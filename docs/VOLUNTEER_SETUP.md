@@ -27,10 +27,10 @@ The right image tag depends on your hardware. Check which backend matches your s
 
 | Backend | Tag | When to use |
 |---------|-----|-------------|
-| **NVIDIA CUDA** | `ghcr.io/slopsmith/volunteer:cuda` (also `:latest`) | NVIDIA GeForce RTX, GTX, Quadro, Tesla (most common) |
-| **AMD ROCm** | `ghcr.io/slopsmith/volunteer:rocm` | AMD Radeon RX 7000+, Instinct |
-| **Vulkan** | `ghcr.io/slopsmith/volunteer:vulkan` | Any GPU: NVIDIA, AMD (older cards), Intel Arc, Apple via MoltenVK |
-| **Intel SYCL** | `ghcr.io/slopsmith/volunteer:intel` | Intel Arc, Iris Xe, built-in GPUs |
+| **NVIDIA CUDA** | `ghcr.io/got-feedback/volunteer:cuda` (also `:latest`) | NVIDIA GeForce RTX, GTX, Quadro, Tesla (most common) |
+| **AMD ROCm** | `ghcr.io/got-feedback/volunteer:rocm` | AMD Radeon RX 7000+, Instinct |
+| **Vulkan** | `ghcr.io/got-feedback/volunteer:vulkan` | Any GPU: NVIDIA, AMD (older cards), Intel Arc, Apple via MoltenVK |
+| **Intel SYCL** | `ghcr.io/got-feedback/volunteer:intel` | Intel Arc, Iris Xe, built-in GPUs |
 
 If you're not sure, start with `cuda` for NVIDIA or `vulkan` for everything else. Both can be run side by side, so you can switch if one performs better.
 
@@ -48,7 +48,7 @@ In File Explorer, create a folder called `code-review-models` — for example at
 3. In the terminal that opens, paste this command and press Enter:
 
 ```
-docker pull ghcr.io/slopsmith/volunteer:latest
+docker pull ghcr.io/got-feedback/volunteer:latest
 ```
 
 If you have an AMD or Intel GPU, replace `latest` with the matching tag from the table above (e.g. `rocm`, `vulkan`, or `intel`).
@@ -58,7 +58,7 @@ Wait for the download to finish — you'll see progress in the terminal.
 ### Step 3: Create and run the container (Docker Desktop GUI)
 
 1. In Docker Desktop, go to the **Images** tab
-2. Find `ghcr.io/slopsmith/volunteer:latest` and click the **Run** button (the play icon)
+2. Find `ghcr.io/got-feedback/volunteer:latest` and click the **Run** button (the play icon)
 3. A dialog titled **"Run a new container"** will open. Click **Optional Settings** to expand it
 4. Fill in the dialog:
 
@@ -196,7 +196,7 @@ MSYS_NO_PATHCONV=1 docker run -d \
   -e COORDINATOR_URL="<coordinator-url>" \
   -e MODEL_REPO="Qwen/Qwen3-30B-A3B-GGUF" \
   -e MODEL_FILE="Qwen3-30B-A3B-Q4_K_M.gguf" \
-  ghcr.io/slopsmith/volunteer:latest
+  ghcr.io/got-feedback/volunteer:latest
 ```
 
 Or from a direct download URL:
@@ -243,7 +243,7 @@ New volunteer images are released periodically with bug fixes, performance impro
 
 1. **Pull the latest image:**
    ```bash
-   docker pull ghcr.io/slopsmith/volunteer:latest
+   docker pull ghcr.io/got-feedback/volunteer:latest
    ```
 
 2. **Stop and remove your current container:**

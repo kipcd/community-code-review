@@ -238,7 +238,7 @@ async def websocket_endpoint(ws: WebSocket, volunteer_id: str):
         logger.warning(
             "Volunteer %s is using protocol v%d (outdated). "
             "Please update your volunteer image for GPU-aware scheduling. "
-            "Run: docker pull ghcr.io/slopsmith/volunteer:latest",
+            "Run: docker pull ghcr.io/got-feedback/volunteer:latest",
             volunteer_id, protocol_version
         )
     else:

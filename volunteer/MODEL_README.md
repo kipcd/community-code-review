@@ -29,12 +29,12 @@ That's it. The model will re-download on next container start
 
 1. Stop and remove the container: `docker stop code-review-volunteer && docker rm code-review-volunteer`
 2. Delete this entire folder
-3. Remove the Docker image if desired (~6GB): `docker rmi ghcr.io/slopsmith/volunteer:latest`
+3. Remove the Docker image if desired (~6GB): `docker rmi ghcr.io/got-feedback/volunteer:latest`
 
 ## More information
 
-- **Project**: https://github.com/slopsmith/community-code-review
-- **Volunteer setup guide**: https://github.com/slopsmith/community-code-review/blob/main/docs/VOLUNTEER_SETUP.md
+- **Project**: https://github.com/got-feedback/community-code-review
+- **Volunteer setup guide**: https://github.com/got-feedback/community-code-review/blob/main/docs/VOLUNTEER_SETUP.md
 - **Hugging Face**: https://huggingface.co/
 
 ---
