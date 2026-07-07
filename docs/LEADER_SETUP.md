@@ -46,7 +46,7 @@ The workflow that distributes code review configuration to repositories needs it
 
    | Secret | Value |
    |--------|-------|
-   | `PAT_WITH_REPO_SCOPE` | The token you just generated |
+   | `PROPAGATION_TOKEN` | The token you just generated |
 
 ### 2. Add the coordinator secret for OCR workflows
 

@@ -20,7 +20,7 @@ jobs:
         if: ${{ github.event.inputs.repo_name != github.event.repository.name }}
         uses: derberg/manage-files-in-multiple-repositories@v2
         with:
-          github_token: ${{ secrets.PAT_WITH_REPO_SCOPE }}
+          github_token: ${{ secrets.PROPAGATION_TOKEN }}
           patterns_to_include: workflows/ocr-review.yml
           destination: .github/workflows
           patterns_to_ignore: .github/workflows/deploy-ocr.yml,.github/workflows/build-volunteer.yml
@@ -31,8 +31,8 @@ jobs:
       - name: Self-deploy OCR workflow to current repository
         if: ${{ github.event.inputs.repo_name == github.event.repository.name }}
         env:
-          GH_TOKEN: ${{ secrets.PAT_WITH_REPO_SCOPE }}
-          PAT: ${{ secrets.PAT_WITH_REPO_SCOPE }}
+          GH_TOKEN: ${{ secrets.PROPAGATION_TOKEN }}
+          PAT: ${{ secrets.PROPAGATION_TOKEN }}
           REPO: ${{ github.repository }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
